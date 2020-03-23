@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react"
 import Table from "Table"
-import GameCreator from "GameCreator"
+import LandingPage from "LandingPage"
 
-// window.location.hash
+import styled from "styled-components"
 
+const H1 = styled.h1`
+  font-family: "Montserrat", "Open Sans", sans-serif;
+`
 const App = () => {
   const [gameId, setGameId] = useState(null)
 
@@ -20,7 +23,8 @@ const App = () => {
 
   return (
     <div>
-      {!gameId && <GameCreator />}
+      <H1>Decentralized Tic tac toe</H1>
+      {!gameId && <LandingPage />}
       {gameId && (
         <Table editable player="x" onClick={l => console.log("S", l)}>
           {["o", "x", "o", null, null, null, null, null, null]}
