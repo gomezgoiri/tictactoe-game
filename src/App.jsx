@@ -1,25 +1,33 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import Table from "Table"
+import GameCreator from "GameCreator"
 
-const App = () => (
-  <div>
-    <header className="App-header">
-      <p>
-        Edit <code>src/App.js</code> and save to reload.
-      </p>
-      <a
-        className="App-link"
-        href="https://reactjs.org"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Learn React
-      </a>
-    </header>
-    <Table editable player="x" onClick={l => console.log("S", l)}>
-      {["o", "x", "o", null, null, null, null, null, null]}
-    </Table>
-  </div>
-)
+// window.location.hash
+
+const App = () => {
+  const [gameId, setGameId] = useState(null)
+
+  useEffect(() => {
+    setGameId(window.location.hash)
+    const onHashChange = e => {
+      setGameId(window.location.hash)
+    }
+    window.addEventListener("hashchange", onHashChange, false)
+    return () => window.removeEventListener("hashchange", onHashChange).remove
+  }, [])
+
+  console.log("Game ID", gameId)
+
+  return (
+    <div>
+      {!gameId && <GameCreator />}
+      {gameId && (
+        <Table editable player="x" onClick={l => console.log("S", l)}>
+          {["o", "x", "o", null, null, null, null, null, null]}
+        </Table>
+      )}
+    </div>
+  )
+}
 
 export default App
