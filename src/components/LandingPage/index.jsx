@@ -1,9 +1,12 @@
 import React, { useState } from "react"
+import PropTypes from "prop-types"
 
 import { ButtonGroup, Button } from "@material-ui/core"
 import NewGameDialog from "./NewGame"
 
-const GameCreator = () => {
+const EMPTY_FN = () => {}
+
+const GameCreator = ({ onCreate = EMPTY_FN }) => {
   const [creating, setCreating] = useState(false)
 
   return (
@@ -16,13 +19,17 @@ const GameCreator = () => {
       <NewGameDialog
         open={creating}
         onCreate={(role, whoStarts, name) => {
-          console.log("CREATE", role, whoStarts, name)
+          onCreate(role, whoStarts, name)
           setCreating(false)
         }}
         onClose={() => setCreating(false)}
       />
     </>
   )
+}
+
+GameCreator.propTypes = {
+  onCreate: PropTypes.func
 }
 
 export default GameCreator
