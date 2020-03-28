@@ -15,10 +15,7 @@ import {
   TextField
 } from "@material-ui/core"
 
-const ROLES = {
-  X: "x",
-  O: "o"
-}
+import { ROLES, otherRole } from "utils/game"
 
 const NewGameDialog = ({ open, onCreate, onClose }) => {
   const [role, setRole] = useState(ROLES.X)
@@ -65,9 +62,7 @@ const NewGameDialog = ({ open, onCreate, onClose }) => {
             }}
           >
             <MenuItem value={role}>Me</MenuItem>
-            <MenuItem value={Object.values(ROLES).find(r => r !== role)}>
-              My oponent
-            </MenuItem>
+            <MenuItem value={otherRole(role)}>My oponent</MenuItem>
           </Select>
         </FormControl>
 

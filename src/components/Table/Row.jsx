@@ -14,7 +14,7 @@ const Row = ({ children = [], onClick, ...other }) => (
 )
 
 Row.propTypes = {
-  children: PropTypes.arrayOf(PropTypes.oneOf(["x", "o"])),
+  children: PropTypes.arrayOf(PropTypes.oneOf(["x", "o", null])),
   onClick: PropTypes.func.isRequired
 }
 

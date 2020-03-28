@@ -36,7 +36,7 @@ const Td = styled.td`
     background-color: #dc685a;
 
     &:after {
-      content: "o";
+      content: "x";
     }
   }
 
@@ -44,13 +44,14 @@ const Td = styled.td`
     background-color: #ecaf4f;
 
     &:after {
-      content: "x";
+      content: "o";
     }
   }
 `
 
 const Cell = ({ children = "", ...other }) => {
   let className
+
   switch (children) {
     case "o":
       className = "nought"
@@ -66,7 +67,7 @@ const Cell = ({ children = "", ...other }) => {
 
 Cell.propTypes = {
   editable: PropTypes.bool,
-  children: PropTypes.oneOf(["x", "o"]),
+  children: PropTypes.oneOf(["x", "o", null]),
   player: PropTypes.oneOf(["x", "o"]).isRequired,
   onClick: PropTypes.func.isRequired
 }

@@ -1,15 +1,19 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
+import { StateInspector } from "reinspect"
+
 import { PersistenceProvider } from "components/PersistenceContext"
 import App from "components/App"
 import * as serviceWorker from "./serviceWorker"
 
 ReactDOM.render(
   <React.StrictMode>
-    <PersistenceProvider>
-      <App />
-    </PersistenceProvider>
+    <StateInspector name="TicTacToe">
+      <PersistenceProvider>
+        <App />
+      </PersistenceProvider>
+    </StateInspector>
   </React.StrictMode>,
   document.getElementById("root")
 )
