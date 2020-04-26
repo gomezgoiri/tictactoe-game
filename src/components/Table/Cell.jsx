@@ -2,23 +2,40 @@ import React from "react"
 import PropTypes from "prop-types"
 import styled from "styled-components"
 
-const Td = styled.td`
-  background-color: #78bec5;
+/*
   border: 5px solid white;
   border-radius: 14px;
-  cursor: pointer;
-
+  
   height: 140px;
   width: 140px;
 
-  color: white;
-  font-family: "Montserrat", "Open Sans", sans-serif;
   font-size: 4em;
   font-weight: 900;
 
-  text-align: center;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+*/
+
+const Td = styled.td`
+  background-color: #78bec5;
+  cursor: pointer;
+
+  color: white;
+  font-family: "Montserrat", "Open Sans", sans-serif;
+  font-weight: 900;
+
+  text-align: center;
   transition: background-color 0.3s;
+
+  ${({ size = 20 }) => `  
+    height: ${size}vh;
+    width: ${size}vh;
+
+    border: 5px solid white;
+    border-radius: 14px;
+
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: ${size / 2}vh;
+  `}
 
   ${({ player, editable = false }) =>
     editable &&
@@ -47,9 +64,13 @@ const Td = styled.td`
       content: "o";
     }
   }
+
+  &.shadowed {
+    background-color: #ccc;
+  }
 `
 
-const Cell = ({ children = "", ...other }) => {
+const Cell = ({ children = "", shadowed = false, ...other }) => {
   let className
 
   switch (children) {
@@ -62,11 +83,15 @@ const Cell = ({ children = "", ...other }) => {
     default:
   }
 
-  return <Td className={className} {...other} />
+  const shadowedClass = shadowed ? " shadowed" : ""
+
+  return <Td className={className + shadowedClass} {...other} />
 }
 
 Cell.propTypes = {
+  size: PropTypes.number,
   editable: PropTypes.bool,
+  shadowed: PropTypes.bool,
   children: PropTypes.oneOf(["x", "o", null]),
   player: PropTypes.oneOf(["x", "o"]).isRequired,
   onClick: PropTypes.func.isRequired

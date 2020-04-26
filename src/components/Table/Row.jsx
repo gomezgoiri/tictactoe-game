@@ -3,10 +3,15 @@ import PropTypes from "prop-types"
 
 import Cell from "./Cell"
 
-const Row = ({ children = [], onClick, ...other }) => (
+const Row = ({ children = [], highligthed = [], onClick, ...other }) => (
   <tr>
     {children.map((v, k) => (
-      <Cell key={k} onClick={() => onClick(k)} {...other}>
+      <Cell
+        key={k}
+        shadowed={!highligthed[k]}
+        onClick={() => onClick(k)}
+        {...other}
+      >
         {v}
       </Cell>
     ))}
@@ -14,6 +19,7 @@ const Row = ({ children = [], onClick, ...other }) => (
 )
 
 Row.propTypes = {
+  highligthed: PropTypes.arrayOf(PropTypes.number),
   children: PropTypes.arrayOf(PropTypes.oneOf(["x", "o", null])),
   onClick: PropTypes.func.isRequired
 }
