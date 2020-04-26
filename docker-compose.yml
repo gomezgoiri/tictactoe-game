@@ -1,0 +1,22 @@
+version: "3"
+
+networks:
+  default:
+    # use the bridge driver, but enable IPv6
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "true"
+    ipam:
+      config:
+        - subnet: 192.168.30.0/24
+        # - gateway: 192.168.30.1
+
+services:
+  agent-1:
+    container_name: ipfs-webrtc
+    image: libp2p/js-libp2p-webrtc-star:latest
+    ports:
+      - 9090:9090
+    networks:
+      default:
+        ipv4_address: 192.168.30.3
