@@ -3,7 +3,7 @@ import { useReducer } from "reinspect"
 
 import shortid from "shortid"
 
-import { initDb } from "utils/persistence"
+import initIpfs from "utils/ipfs"
 import { reducer, initialState, actions, selectors } from "utils/game"
 
 const Context = React.createContext()
@@ -22,6 +22,7 @@ const parseHash = () => {
 
 const PersistenceProvider = ({ children }) => {
   const [db, setDatabase] = useState()
+  const [notif, setNotifications] = useState()
   const [state, dispatch] = useReducer(
     reducer,
     initialState,
@@ -30,22 +31,24 @@ const PersistenceProvider = ({ children }) => {
   )
 
   useEffect(() => {
-    const initDB = async () => {
-      setDatabase(await initDb())
+    const initComms = async () => {
+      const { database, notifications } = await initIpfs()
+      setNotifications(notifications)
+      setDatabase(database)
     }
 
     const { gameId, playerId } = parseHash()
     if (!gameId && !playerId) {
       dispatch(actions.setGameCreation())
     }
-    initDB()
+    initComms()
   }, [])
 
   const loadGame = async () => {
     const { gameId, playerId, peerId } = parseHash()
 
     if (peerId) {
-      await db.connectToPeer(peerId)
+      await notif.connectToPeer(peerId)
     }
 
     if (
@@ -126,17 +129,16 @@ const PersistenceProvider = ({ children }) => {
   }, [db, state])
 
   useEffect(() => {
-    if (db && state.gameId) {
-      // Don't update myself
-      db.onUpdate(state.gameId, async (role, move) => {
+    if (notif && state.gameId) {
+      notif.onUpdate(state.gameId, async (role, move) => {
         await dispatch(actions.movementMade(role, move))
       })
     }
-  }, [db, state.gameId])
+  }, [notif, state.gameId])
 
   const onMove = async (cellNumber) => {
     await dispatch(actions.makeMove(cellNumber))
-    db.notifyMove(state.gameId, selectors.getMyRole(state), cellNumber)
+    notif.notifyMove(state.gameId, selectors.getMyRole(state), cellNumber)
   }
   const onGameReset = async () => {
     await dispatch(actions.resetGame())
