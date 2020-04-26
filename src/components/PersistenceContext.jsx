@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react"
 import { useReducer } from "reinspect"
 
 import shortid from "shortid"
-import CircularProgress from "@material-ui/core/CircularProgress"
 
 import { initDb } from "utils/persistence"
 import { reducer, initialState, actions, selectors } from "utils/game"
@@ -15,8 +14,10 @@ const getHashValue = () => {
 }
 
 const parseHash = () => {
-  const [gameId = null, playerId = null] = getHashValue().split(".")
-  return { gameId, playerId }
+  const [gameId = null, playerId = null, peerId = null] = getHashValue().split(
+    "."
+  )
+  return { gameId, playerId, peerId }
 }
 
 const PersistenceProvider = ({ children }) => {
@@ -41,7 +42,12 @@ const PersistenceProvider = ({ children }) => {
   }, [])
 
   const loadGame = async () => {
-    const { gameId, playerId } = parseHash()
+    const { gameId, playerId, peerId } = parseHash()
+
+    if (peerId) {
+      await db.connectToPeer(peerId)
+    }
+
     if (
       gameId &&
       playerId &&
@@ -51,23 +57,23 @@ const PersistenceProvider = ({ children }) => {
 
       // Stored game
       if (loaded) {
-        const { turn, player1, player2 } = loaded
+        const { turn, player1, player2, table } = loaded
 
-        // console.log(JSON.stringify(result, null, 2))
         dispatch(
           actions.loadGame({
             gameId,
             turn,
             player1,
             player2,
+            table,
             me: playerId
           })
         )
-      } else {
+      } /* else {
         // redirect and start game creation
         dispatch(actions.setGameCreation())
         window.location.hash = ""
-      }
+      }*/
     }
   }
 
@@ -99,27 +105,45 @@ const PersistenceProvider = ({ children }) => {
       })
     )
 
-    // store game info
-    await db.initSession(newGameId, player1Id, player2Id, role, name, whoStarts)
-
     // Compose hash for player one: and redirect.
     window.location.hash = `${newGameId}.${player1Id}`
   }
 
-  const onMove = async cellNumber =>
-    await dispatch(actions.makeMove(cellNumber))
+  // from state to minimal stored state
+  const toStoredState = (state) => ({
+    player1: state.me,
+    player2: state.other,
+    turn: state.turn,
+    table: state.table
+  })
 
-  if (selectors.isLoading(state)) {
-    return (
-      <div>
-        <div>Loading...</div>
-        <CircularProgress />
-      </div>
-    )
+  // Synchronization function
+  useEffect(() => {
+    if (db) {
+      // Don't update in the initial load!
+      db.update(state.gameId, toStoredState(state))
+    }
+  }, [db, state])
+
+  useEffect(() => {
+    if (db && state.gameId) {
+      // Don't update myself
+      db.onUpdate(state.gameId, async (role, move) => {
+        await dispatch(actions.movementMade(role, move))
+      })
+    }
+  }, [db, state.gameId])
+
+  const onMove = async (cellNumber) => {
+    await dispatch(actions.makeMove(cellNumber))
+    db.notifyMove(state.gameId, selectors.getMyRole(state), cellNumber)
+  }
+  const onGameReset = async () => {
+    await dispatch(actions.resetGame())
   }
 
   return (
-    <Context.Provider value={{ onGameCreate, onMove, ...state }}>
+    <Context.Provider value={{ onGameCreate, onGameReset, onMove, ...state }}>
       {children}
     </Context.Provider>
   )
