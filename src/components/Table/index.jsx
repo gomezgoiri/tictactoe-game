@@ -5,7 +5,7 @@ import Row from "./Row"
 
 const Table = ({ children = [], highligthed = [], onClick, ...other }) => {
   const shiftOnClick = (n = 0) => (i) => {
-    if (other.editable) {
+    if (other.editable && onClick) {
       onClick(i + n)
     }
   }
@@ -46,7 +46,7 @@ Table.propTypes = {
   editable: PropTypes.bool.isRequired,
   highligthed: PropTypes.arrayOf(PropTypes.number),
   children: PropTypes.arrayOf(PropTypes.oneOf(["x", "o", null])).isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func
 }
 
 export default Table

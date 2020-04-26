@@ -39,6 +39,7 @@ const Td = styled.td`
 
   ${({ player, editable = false }) =>
     editable &&
+    player &&
     `&:hover {
         background-color: #3d4250;
         content: "${player}";
@@ -92,8 +93,8 @@ Cell.propTypes = {
   size: PropTypes.number,
   editable: PropTypes.bool,
   shadowed: PropTypes.bool,
+  player: PropTypes.oneOf(["x", "o"]),
   children: PropTypes.oneOf(["x", "o", null]),
-  player: PropTypes.oneOf(["x", "o"]).isRequired,
   onClick: PropTypes.func.isRequired
 }
 
