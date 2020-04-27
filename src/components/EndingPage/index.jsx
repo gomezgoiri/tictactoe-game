@@ -28,7 +28,8 @@ const EndingPage = ({ show = false, onReset }) => {
     >
       <DialogTitle id="ending-dialog-title">Game finished!</DialogTitle>
       <DialogContent>
-        <p>You {me === winner ? "won" : "lost"}!</p>
+        {winner && <p>You {me === winner ? "won" : "lost"}!</p>}
+        {!winner && <p>Tie!</p>}
 
         <Table size={15} editable={false} highligthed={winnerLine}>
           {state.table}
