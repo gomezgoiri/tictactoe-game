@@ -55,7 +55,9 @@ const PersistenceProvider = ({ children }) => {
         const { gameId, playerId } = parseHash()
 
         if (gameId && playerId) {
+          console.log("let's load it")
           const loaded = await db.loadSession(gameId)
+          console.log("loaded")
 
           // Stored game
           if (loaded) {
@@ -96,7 +98,7 @@ const PersistenceProvider = ({ children }) => {
     }
   }, [db, state])
 
-  const onGameCreate = async (role, whoStarts, name) => {
+  const onGameCreate = async (role, whoStarts) => {
     // create game id
     const newGameId = shortid.generate()
     const player1Id = shortid.generate()
@@ -108,8 +110,7 @@ const PersistenceProvider = ({ children }) => {
         player1Id,
         player2Id,
         role,
-        whoStarts,
-        name
+        whoStarts
       })
     )
 

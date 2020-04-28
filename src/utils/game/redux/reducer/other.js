@@ -9,8 +9,7 @@ const reducer = (state, action) => {
     case t.LOAD_GAME:
       const { me, player1 } = payload
       const otherAsPlayer = me === player1.id ? payload.player2 : player1
-      const { id, name } = otherAsPlayer
-      return { ...state, id, name }
+      return { ...state, id: otherAsPlayer.id }
 
     default:
   }

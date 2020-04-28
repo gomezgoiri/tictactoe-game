@@ -77,6 +77,8 @@ const reducer = (state, action) => {
 
 const isLoading = (state) => state.loading
 
+const isCreated = (state) => state.gameId
+
 const shouldWrite = (state) => state.shouldWrite
 
 const isOtherPlayerReady = (state) => state.other.name !== undefined
@@ -121,6 +123,7 @@ const isFinished = (state) =>
 
 const selectors = {
   isLoading,
+  isCreated,
   shouldWrite,
   getOtherPlayerHash,
   getMyRole,

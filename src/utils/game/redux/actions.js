@@ -1,13 +1,12 @@
 import * as t from "./actionTypes"
 
-const initGame = ({ gameId, player1Id, player2Id, role, name, whoStarts }) => ({
+const initGame = ({ gameId, player1Id, player2Id, role, whoStarts }) => ({
   type: t.INIT_GAME,
   payload: {
     gameId,
     player1Id,
     player2Id,
     role,
-    name,
     whoStarts
   }
 })

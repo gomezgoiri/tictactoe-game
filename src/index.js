@@ -4,7 +4,7 @@ import ReactDOM from "react-dom"
 import { StateInspector } from "reinspect"
 
 import { PersistenceProvider } from "components/PersistenceContext"
-import App from "components/App"
+import App from "./App"
 import * as serviceWorker from "./serviceWorker"
 
 ReactDOM.render(
