@@ -1,7 +1,6 @@
 import IPFS from "ipfs"
 
 import createDatabase from "./Database"
-import NotificationHandler from "./NotificationHandler"
 
 const IPFS_OPTIONS = {
   repo: "/orbitdb/tic-tac-toe/ipfs",
@@ -15,6 +14,7 @@ const IPFS_OPTIONS = {
       ]
     }
   },
+  preload: { enabled: false },
   EXPERIMENTAL: {
     pubsub: true
   }
@@ -32,10 +32,10 @@ const initIpfs = async () => {
     ipfs = await IPFS.create(IPFS_OPTIONS)
   }
 
-  const notifications = new NotificationHandler(ipfs)
-  const database = await createDatabase(ipfs)
+  // Now we'll use only OrbitDB to handle notifications
+  // const notifications = new NotificationHandler(ipfs)
 
-  return { database, notifications }
+  return await createDatabase(ipfs)
 }
 
 export default initIpfs

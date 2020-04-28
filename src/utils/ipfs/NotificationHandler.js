@@ -1,3 +1,9 @@
+const serializeTopic = (gameId, command) => `${gameId}.${command}`
+
+const serializeNotification = (data = []) => Buffer.from(data.join(","))
+
+const parseNotification = (bytes) => String(bytes).split(",")
+
 class NotificationHandler {
   constructor(ipfs) {
     this._ipfs = ipfs
@@ -16,19 +22,29 @@ class NotificationHandler {
   }
 
   async notifyMove(gameId, role, move) {
-    await this._ipfs.pubsub.publish(gameId, Buffer.from(`${role},${move}`))
+    await this._ipfs.pubsub.publish(
+      serializeTopic(gameId, "move"),
+      serializeNotification([role, move])
+    )
   }
 
-  async onUpdate(gameId, callback) {
+  async notifyReset(gameId) {
+    await this._ipfs.pubsub.publish(serializeTopic(gameId, "reset"))
+  }
+
+  async on(gameId, command, callback) {
     const { id } = await this._ipfs.id()
 
-    await this._ipfs.pubsub.subscribe(gameId, ({ from, ...other }) => {
-      if (from === id) {
-        console.log("ID and FROM match", id)
+    await this._ipfs.pubsub.subscribe(
+      serializeTopic(gameId, command),
+      ({ from, ...other }) => {
+        if (from === id) {
+          console.log("ID and FROM match", id)
+        }
+
+        callback(parseNotification(other.data))
       }
-      const [role, move] = String(other.data).split(",")
-      callback(role, Number(move))
-    })
+    )
   }
 }
 

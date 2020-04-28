@@ -3,26 +3,11 @@ import OrbitDB from "orbit-db"
 class Database {
   constructor(dbInstance) {
     this._db = dbInstance
+    this._initialReplica = false
 
-    dbInstance.events.on("replicated", (address) => {
-      console.log("Replicated", address)
-      // Each time the player updates the DB
-    })
-
-    dbInstance.events.on("ready", () => {
-      console.log("Ready")
-    })
-
-    dbInstance.events.on("write", () => {
-      console.log("Write")
-    })
-
-    dbInstance.events.on(
-      "load.progress",
-      (address, hash, entry, progress, total) => {
-        console.log("Loading", address, hash, entry, progress, total)
-      }
-    )
+    /*dbInstance.events.on("write", (address, entry, heads) => {
+      console.log("Write", entry.payload)
+    })*/
   }
 
   async loadSession(gameId) {
@@ -31,6 +16,18 @@ class Database {
 
   async update(gameId, newState) {
     await this._db.put(gameId, newState)
+  }
+
+  onUpdated(listener) {
+    this._db.events.on("replicated", () => {
+      if (!this._initialReplica) {
+        // After loading the state for the first time,
+        // OrbitDB replicates it but we don't want a callback.
+        this._initialReplica = true
+      } else {
+        listener()
+      }
+    })
   }
 }
 

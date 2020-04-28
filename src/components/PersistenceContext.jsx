@@ -14,15 +14,20 @@ const getHashValue = () => {
 }
 
 const parseHash = () => {
-  const [gameId = null, playerId = null, peerId = null] = getHashValue().split(
-    "."
-  )
-  return { gameId, playerId, peerId }
+  const [gameId = null, playerId = null] = getHashValue().split(".")
+  return { gameId, playerId }
 }
+
+// from state to minimal stored state
+const toStoredState = (state) => ({
+  player1: state.me,
+  player2: state.other,
+  turn: state.turn,
+  table: state.table
+})
 
 const PersistenceProvider = ({ children }) => {
   const [db, setDatabase] = useState()
-  const [notif, setNotifications] = useState()
   const [state, dispatch] = useReducer(
     reducer,
     initialState,
@@ -31,9 +36,8 @@ const PersistenceProvider = ({ children }) => {
   )
 
   useEffect(() => {
-    const initComms = async () => {
-      const { database, notifications } = await initIpfs()
-      setNotifications(notifications)
+    const initDB = async () => {
+      const database = await initIpfs()
       setDatabase(database)
     }
 
@@ -41,49 +45,42 @@ const PersistenceProvider = ({ children }) => {
     if (!gameId && !playerId) {
       dispatch(actions.setGameCreation())
     }
-    initComms()
+    initDB()
   }, [])
 
-  const loadGame = async () => {
-    const { gameId, playerId, peerId } = parseHash()
-
-    if (peerId) {
-      await notif.connectToPeer(peerId)
-    }
-
-    if (
-      gameId &&
-      playerId &&
-      !selectors.isAlreadyLoaded(state, gameId, playerId)
-    ) {
-      const loaded = await db.loadSession(gameId)
-
-      // Stored game
-      if (loaded) {
-        const { turn, player1, player2, table } = loaded
-
-        dispatch(
-          actions.loadGame({
-            gameId,
-            turn,
-            player1,
-            player2,
-            table,
-            me: playerId
-          })
-        )
-      } /* else {
-        // redirect and start game creation
-        dispatch(actions.setGameCreation())
-        window.location.hash = ""
-      }*/
-    }
-  }
-
   useEffect(() => {
-    // Is database initialized?
+    // Has the database been initialized?
     if (db) {
+      const loadGame = async () => {
+        const { gameId, playerId } = parseHash()
+
+        if (gameId && playerId) {
+          const loaded = await db.loadSession(gameId)
+
+          // Stored game
+          if (loaded) {
+            const { turn, player1, player2, table } = loaded
+
+            dispatch(
+              actions.loadGame({
+                gameId,
+                turn,
+                player1,
+                player2,
+                table,
+                me: playerId
+              })
+            )
+          } else {
+            // redirect and start game creation
+            dispatch(actions.setGameCreation())
+            window.location.hash = ""
+          }
+        }
+      }
+
       loadGame()
+      db.onUpdated(loadGame)
 
       window.addEventListener("hashchange", loadGame, false)
       return () => window.removeEventListener("hashchange", loadGame)
@@ -91,13 +88,21 @@ const PersistenceProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db])
 
+  // Synchronization function
+  useEffect(() => {
+    if (db && selectors.shouldWrite(state)) {
+      // Don't update in the initial load!
+      db.update(state.gameId, toStoredState(state))
+    }
+  }, [db, state])
+
   const onGameCreate = async (role, whoStarts, name) => {
     // create game id
     const newGameId = shortid.generate()
     const player1Id = shortid.generate()
     const player2Id = shortid.generate()
 
-    await dispatch(
+    dispatch(
       actions.initGame({
         gameId: newGameId,
         player1Id,
@@ -112,36 +117,12 @@ const PersistenceProvider = ({ children }) => {
     window.location.hash = `${newGameId}.${player1Id}`
   }
 
-  // from state to minimal stored state
-  const toStoredState = (state) => ({
-    player1: state.me,
-    player2: state.other,
-    turn: state.turn,
-    table: state.table
-  })
-
-  // Synchronization function
-  useEffect(() => {
-    if (db) {
-      // Don't update in the initial load!
-      db.update(state.gameId, toStoredState(state))
-    }
-  }, [db, state])
-
-  useEffect(() => {
-    if (notif && state.gameId) {
-      notif.onUpdate(state.gameId, async (role, move) => {
-        await dispatch(actions.movementMade(role, move))
-      })
-    }
-  }, [notif, state.gameId])
-
   const onMove = async (cellNumber) => {
-    await dispatch(actions.makeMove(cellNumber))
-    notif.notifyMove(state.gameId, selectors.getMyRole(state), cellNumber)
+    dispatch(actions.makeMove(cellNumber))
   }
+
   const onGameReset = async () => {
-    await dispatch(actions.resetGame())
+    dispatch(actions.resetGame())
   }
 
   return (

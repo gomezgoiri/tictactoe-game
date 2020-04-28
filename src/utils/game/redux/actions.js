@@ -30,17 +30,4 @@ const setGameCreation = () => ({ type: t.CREATING_GAME })
 
 const makeMove = (cellNumber) => ({ type: t.MAKE_MOVE, payload: cellNumber })
 
-// Movement notified
-const movementMade = (role, cellNumber) => ({
-  type: t.MOVEMENT_MADE,
-  payload: { role, cellNumber }
-})
-
-export {
-  initGame,
-  loadGame,
-  resetGame,
-  setGameCreation,
-  makeMove,
-  movementMade
-}
+export { initGame, loadGame, resetGame, setGameCreation, makeMove }

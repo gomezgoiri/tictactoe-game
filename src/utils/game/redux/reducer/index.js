@@ -5,6 +5,7 @@ import { otherRole } from "../../roles"
 
 const initialState = {
   loading: true,
+  shouldWrite: false, // Should the DB be updated afterwards?
   gameId: null,
   me: {
     id: null,
@@ -25,6 +26,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         loading: false,
+        shouldWrite: true,
         gameId: payload.gameId,
         turn: payload.whoStarts,
         me: me(state.me, action),
@@ -32,42 +34,38 @@ const reducer = (state, action) => {
       }
 
     case t.LOAD_GAME:
-      return {
-        ...state,
-        loading: false,
-        gameId: payload.gameId,
-        turn: payload.turn,
-        table: payload.table,
-        me: me(state.me, action),
-        other: other(state.other, action)
+      if (
+        payload.gameId !== state.gameId ||
+        !payload.table.every((c, i) => c === state.table[i])
+      ) {
+        return {
+          ...state,
+          loading: false,
+          shouldWrite: false,
+          gameId: payload.gameId,
+          turn: payload.turn,
+          table: payload.table,
+          me: me(state.me, action),
+          other: other(state.other, action)
+        }
       }
+      break
 
     case t.RESET_GAME:
-      return { ...state, table: new Array(9).fill(null) }
+      return { ...state, shouldWrite: true, table: new Array(9).fill(null) }
 
     case t.CREATING_GAME:
-      return { ...state, loading: false }
+      return { ...state, shouldWrite: false, loading: false }
 
     case t.MAKE_MOVE:
       if (isMyTurn(state)) {
         return {
           ...state,
+          shouldWrite: true,
           turn: otherRole(state.turn),
           table: state.table.map((v, k) =>
             k === payload ? getMyRole(state) : v
           )
-        }
-      }
-      break
-
-    case t.MOVEMENT_MADE:
-      const { role, cellNumber } = payload
-      if (getMyRole(state) !== role) {
-        // Other player moved
-        return {
-          ...state,
-          turn: otherRole(state.turn),
-          table: state.table.map((v, k) => (k === cellNumber ? role : v))
         }
       }
       break
@@ -79,8 +77,7 @@ const reducer = (state, action) => {
 
 const isLoading = (state) => state.loading
 
-const isAlreadyLoaded = (state, gameId, playerId) =>
-  state.gameId === gameId && state.me.id === playerId
+const shouldWrite = (state) => state.shouldWrite
 
 const isOtherPlayerReady = (state) => state.other.name !== undefined
 
@@ -108,7 +105,9 @@ const WIN_POSITIONS = [
 
 const getWinnerLine = (state) => {
   const { table: t } = state
-  return WIN_POSITIONS.find((r) => r.every((v) => t[r[0]] === t[v]))
+  return WIN_POSITIONS.find(
+    (r) => t[r[0]] !== null && r.every((v) => t[r[0]] === t[v])
+  )
 }
 
 const getWinner = (state) => {
@@ -122,7 +121,7 @@ const isFinished = (state) =>
 
 const selectors = {
   isLoading,
-  isAlreadyLoaded,
+  shouldWrite,
   getOtherPlayerHash,
   getMyRole,
   isMyTurn,
