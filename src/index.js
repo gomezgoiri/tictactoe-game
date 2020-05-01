@@ -2,8 +2,9 @@ import React from "react"
 import ReactDOM from "react-dom"
 
 import { StateInspector } from "reinspect"
+import { PersistenceProvider } from "contexts/PersistenceContext"
+import { StateProvider } from "contexts/StateContext"
 
-import { PersistenceProvider } from "components/PersistenceContext"
 import App from "./App"
 import * as serviceWorker from "./serviceWorker"
 
@@ -11,7 +12,9 @@ ReactDOM.render(
   <React.StrictMode>
     <StateInspector name="TicTacToe">
       <PersistenceProvider>
-        <App />
+        <StateProvider>
+          <App />
+        </StateProvider>
       </PersistenceProvider>
     </StateInspector>
   </React.StrictMode>,

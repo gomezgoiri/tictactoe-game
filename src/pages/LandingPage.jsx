@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useContext } from "react"
 import PropTypes from "prop-types"
 
 import {
@@ -10,6 +10,7 @@ import {
   MenuItem
 } from "@material-ui/core"
 
+import StateContext from "contexts/StateContext"
 import { ROLES, otherRole } from "utils/game"
 
 const EMPTY_FN = () => {}
@@ -17,6 +18,7 @@ const EMPTY_FN = () => {}
 const GameCreator = ({ onCreate = EMPTY_FN }) => {
   const [role, setRole] = useState(ROLES.X)
   const [whoStarts, setWhoStarts] = useState(ROLES.X)
+  const { onGameCreate } = useContext(StateContext)
 
   return (
     <Grid container direction="column" justify="center" alignItems="flex-start">
@@ -56,7 +58,7 @@ const GameCreator = ({ onCreate = EMPTY_FN }) => {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => onCreate(role, whoStarts)}
+        onClick={() => onGameCreate(role, whoStarts)}
       >
         Create new game
       </Button>

@@ -9,12 +9,12 @@ import {
   DialogActions
 } from "@material-ui/core"
 
-import { PersistenceContext } from "components/PersistenceContext"
+import StateContext from "contexts/StateContext"
 import Table from "components/Table"
 import { selectors } from "utils/game"
 
-const EndingPage = ({ show = false, onReset }) => {
-  const { onGameCreate, onMove, ...state } = useContext(PersistenceContext)
+const EndingPage = ({ show = false }) => {
+  const { onGameReset, ...state } = useContext(StateContext)
 
   const me = selectors.getMyRole(state)
   const winner = selectors.getWinner(state)
@@ -36,7 +36,7 @@ const EndingPage = ({ show = false, onReset }) => {
         </Table>
       </DialogContent>{" "}
       <DialogActions>
-        <Button onClick={onReset} color="primary">
+        <Button onClick={onGameReset} color="primary">
           Reset game
         </Button>
       </DialogActions>
@@ -45,8 +45,7 @@ const EndingPage = ({ show = false, onReset }) => {
 }
 
 EndingPage.propTypes = {
-  show: PropTypes.bool,
-  onReset: PropTypes.func.isRequired
+  show: PropTypes.bool
 }
 
 export default EndingPage

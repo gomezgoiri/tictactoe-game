@@ -1,21 +1,18 @@
 import IPFS from "ipfs"
 
-import createDatabase from "./Database"
-
 const IPFS_OPTIONS = {
   repo: "/orbitdb/tic-tac-toe/ipfs",
+  preload: { enabled: false },
   config: {
     Addresses: {
       Swarm: [
         // Use local signal server
         // "/ip4/0.0.0.0/tcp/9090/wss/p2p-webrtc-star"
-        // "/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star/"
+        "/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star/",
         "/ip4/127.0.0.1/tcp/9090/ws/p2p-webrtc-star"
-        // "/dns4/star-signal.cloud.ipfs.team/wss/p2p-webrtc-star"
       ]
     }
   },
-  preload: { enabled: false },
   EXPERIMENTAL: {
     pubsub: true
   }
@@ -36,7 +33,7 @@ const initIpfs = async () => {
   // Now we'll use only OrbitDB to handle notifications
   // const notifications = new NotificationHandler(ipfs)
 
-  return await createDatabase(ipfs)
+  return ipfs
 }
 
-export default initIpfs
+export { initIpfs }

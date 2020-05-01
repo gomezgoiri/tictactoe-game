@@ -3,11 +3,14 @@ import styled from "styled-components"
 
 import { Container, CircularProgress } from "@material-ui/core"
 
+import PersistenceContext from "contexts/PersistenceContext"
+import StateContext from "contexts/StateContext"
+
 import LandingContent from "pages/LandingPage"
+import FailedLoadContent from "pages/FailedLoadPage"
 import GameContent from "pages/GamePage"
 import EndingContent from "pages/EndingPage"
 
-import { PersistenceContext } from "components/PersistenceContext"
 import { selectors } from "utils/game"
 
 const H1 = styled.h1`
@@ -25,21 +28,38 @@ const Page = ({ children }) => (
 // https://github.com/orbitdb/orbit-web/blob/master/src/index.js
 
 const App = () => {
-  const { onGameCreate, onGameReset, ...state } = useContext(PersistenceContext)
+  const { isDBReady, feedback } = useContext(PersistenceContext)
+  const { isInGameView, ...state } = useContext(StateContext)
 
-  if (selectors.isLoading(state)) {
+  if (!isInGameView) {
+    // !selectors.isCreated(state)
+    // No need to wait for DB loading while we create the game...
     return (
       <Page>
-        <p>Loading...</p>
-        <CircularProgress />
+        <LandingContent />
       </Page>
     )
   }
 
-  if (!selectors.isCreated(state)) {
+  if (!isDBReady) {
+    // selectors.isLoading(state))
+
+    // import { Container, CircularProgress } from "@material-ui/core"
+
     return (
       <Page>
-        <LandingContent onCreate={onGameCreate} />
+        <CircularProgress />
+        {feedback.map((f) => (
+          <p key={f}>{f}</p>
+        ))}
+      </Page>
+    )
+  }
+
+  if (selectors.failedLoad(state)) {
+    return (
+      <Page>
+        <FailedLoadContent />
       </Page>
     )
   }
@@ -48,7 +68,7 @@ const App = () => {
 
   return (
     <Page>
-      <EndingContent show={finishedGame} onReset={onGameReset} />
+      <EndingContent show={finishedGame} />
       <GameContent />
     </Page>
   )

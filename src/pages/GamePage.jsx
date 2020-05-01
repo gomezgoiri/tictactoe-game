@@ -3,7 +3,7 @@ import React, { useContext } from "react"
 import Table from "components/Table"
 import ClipboardCopyButton from "components/ClipboardCopy"
 
-import { PersistenceContext } from "components/PersistenceContext"
+import StateContext from "contexts/StateContext"
 import { selectors } from "utils/game"
 
 const getBaseUrl = () => {
@@ -18,7 +18,7 @@ const getBaseUrl = () => {
 }
 
 const GamePage = () => {
-  const { onMove, ...state } = useContext(PersistenceContext)
+  const { onMove, ...state } = useContext(StateContext)
 
   const invitationHash = selectors.getOtherPlayerHash(state)
 
