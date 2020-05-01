@@ -23,10 +23,19 @@ const loadGame = ({ gameId, turn, player1, player2, me, table }) => ({
   }
 })
 
+const failedLoadGame = () => ({ type: t.LOAD_GAME })
+
 const resetGame = () => ({ type: t.RESET_GAME })
 
 const setGameCreation = () => ({ type: t.CREATING_GAME })
 
 const makeMove = (cellNumber) => ({ type: t.MAKE_MOVE, payload: cellNumber })
 
-export { initGame, loadGame, resetGame, setGameCreation, makeMove }
+export {
+  initGame,
+  loadGame,
+  failedLoadGame,
+  resetGame,
+  setGameCreation,
+  makeMove
+}

@@ -5,6 +5,7 @@ import { otherRole } from "../../roles"
 
 const initialState = {
   loading: true,
+  failedLoad: false,
   shouldWrite: false, // Should the DB be updated afterwards?
   gameId: null,
   me: {
@@ -34,20 +35,25 @@ const reducer = (state, action) => {
       }
 
     case t.LOAD_GAME:
-      if (
-        payload.gameId !== state.gameId ||
-        !payload.table.every((c, i) => c === state.table[i])
-      ) {
-        return {
-          ...state,
-          loading: false,
-          shouldWrite: false,
-          gameId: payload.gameId,
-          turn: payload.turn,
-          table: payload.table,
-          me: me(state.me, action),
-          other: other(state.other, action)
+      if (payload) {
+        if (
+          payload.gameId !== state.gameId ||
+          !payload.table.every((c, i) => c === state.table[i])
+        ) {
+          return {
+            ...state,
+            loading: false,
+            failedLoad: false,
+            shouldWrite: false,
+            gameId: payload.gameId,
+            turn: payload.turn,
+            table: payload.table,
+            me: me(state.me, action),
+            other: other(state.other, action)
+          }
         }
+      } else {
+        return { ...state, loading: false, failedLoad: true }
       }
       break
 
@@ -77,7 +83,9 @@ const reducer = (state, action) => {
 
 const isLoading = (state) => state.loading
 
-const isCreated = (state) => state.gameId
+const failedLoad = (state) => state.failedLoad
+
+const isCreated = (state) => state.gameId !== null
 
 const shouldWrite = (state) => state.shouldWrite
 
@@ -123,6 +131,7 @@ const isFinished = (state) =>
 
 const selectors = {
   isLoading,
+  failedLoad,
   isCreated,
   shouldWrite,
   getOtherPlayerHash,
