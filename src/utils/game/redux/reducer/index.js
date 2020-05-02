@@ -37,6 +37,7 @@ const reducer = (state, action) => {
     case t.LOAD_GAME:
       if (payload) {
         if (
+          state.failedLoad ||
           payload.gameId !== state.gameId ||
           !payload.table.every((c, i) => c === state.table[i])
         ) {
