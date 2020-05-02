@@ -11,6 +11,7 @@ import FailedLoadContent from "pages/FailedLoadPage"
 import GameContent from "pages/GamePage"
 import EndingContent from "pages/EndingPage"
 
+import FadingLog from "components/FadingLog"
 import { selectors } from "utils/game"
 
 const H1 = styled.h1`
@@ -49,9 +50,7 @@ const App = () => {
     return (
       <Page>
         <CircularProgress />
-        {feedback.map((f) => (
-          <p key={f}>{f}</p>
-        ))}
+        <FadingLog feedback={feedback} />
       </Page>
     )
   }
